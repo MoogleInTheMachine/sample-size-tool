@@ -109,7 +109,7 @@ export default function SampleSizeCalculator() {
       },
       {
         label: 'Required Sample Size',
-        data: levels.map(({ z }) => requiredSampleSize(marginOfErrorTarget, z, populationSize, 0.5, useFiniteCorrection)),
+        data: levels.map(() => requiredSampleSize(marginOfErrorTarget, 1.44, populationSize, 0.5, useFiniteCorrection)),
         backgroundColor: 'rgba(234, 88, 12, 0.6)',
       },
     ],
@@ -172,7 +172,7 @@ export default function SampleSizeCalculator() {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold mb-1 flex items-center gap-1">Target Margin of Error (%)
+              <label className="block text-sm font-semibold mb-1 flex items-center gap-1">Target Margin of Error (%) 
                 <span title="This controls the width of the confidence interval. Smaller values require larger sample sizes." className="text-gray-500">
                   <Info size={16} />
                 </span>
