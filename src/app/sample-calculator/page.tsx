@@ -87,8 +87,8 @@ export default function SampleSizeCalculator() {
     { level: '95%', z: 1.96 },
   ];
 
-  const tableRows = levels.map(({ level }) => {
-    const size = requiredSampleSize(marginOfErrorTarget, 1.44, populationSize, 0.5, useFiniteCorrection);
+  const tableRows = levels.map(({ level, z }) => {
+    const size = requiredSampleSize(marginOfErrorTarget, z, populationSize, 0.5, useFiniteCorrection);
     const isMet = sampleSize >= size;
     const value = showPercent ? ((sampleSize / size) * 100).toFixed(1) + '%' : size.toLocaleString();
     return (
