@@ -114,9 +114,7 @@ export default function SampleSizeCalculator() {
   const tableRows = levels.map(({ level, z }) => {
     const size = requiredSampleSize(marginOfErrorTarget, z, populationSize, 0.5, useFiniteCorrection);
     const isMet = sampleSize >= size;
-    const value = showPercent
-      ? ((sampleSize / size) * 100).toFixed(1) + '%'
-      : size.toLocaleString();
+    const value = showPercent ? ((sampleSize / size) * 100).toFixed(1) + '%' : size.toLocaleString();
     return (
       <tr key={level} className={isMet ? 'bg-green-100 font-semibold' : ''}>
         <td className="border px-2 py-1">{level}</td>
