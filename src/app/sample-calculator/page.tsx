@@ -17,6 +17,11 @@ import {
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
+export const metadata = {
+  title: 'Sample Size Tool',
+  description: 'Estimate confidence levels based on your survey sample size and population.',
+};
+
 /**
  * Calculate the estimated confidence level based on the sample and population sizes,
  * comparing the margin of error at various confidence levels against the target margin.
