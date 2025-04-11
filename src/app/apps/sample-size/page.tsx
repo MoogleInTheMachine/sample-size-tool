@@ -90,11 +90,19 @@ export default function SampleSizeCalculator() {
   // Generic input handler for numeric values.
   const handleInputChange = (setter: React.Dispatch<React.SetStateAction<number>>) =>
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = Number(e.target.value);
+      const raw = e.target.value;
+  
+      // Allow clearing the input
+      if (raw === "") {
+        setter(NaN);
+        return;
+      }
+  
+      const value = Number(raw);
       if (isNaN(value)) {
-        setError('Please enter a valid number.');
+        setError("Please enter a valid number.");
       } else {
-        setError('');
+        setError("");
         setter(value);
       }
     };
