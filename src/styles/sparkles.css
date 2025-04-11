@@ -1,0 +1,33 @@
+.sparkle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  animation: sparkle 12s infinite ease-in-out;
+  opacity: 0;
+}
+
+/* Randomized color classes */
+.sparkle.teal { background-color: #5eead4; }
+.sparkle.blue { background-color: #3b82f6; }
+.sparkle.purple { background-color: #a855f7; }
+.sparkle.white { background-color: rgba(255, 255, 255, 0.9); }
+
+/* Position and animation delays */
+.sparkle-1 { top: 10%; left: 20%; animation-delay: 0s; }
+.sparkle-2 { top: 20%; left: 65%; animation-delay: 2s; }
+.sparkle-3 { top: 35%; left: 35%; animation-delay: 4s; }
+.sparkle-4 { top: 50%; left: 80%; animation-delay: 6s; }
+.sparkle-5 { top: 65%; left: 15%; animation-delay: 8s; }
+.sparkle-6 { top: 80%; left: 50%; animation-delay: 10s; }
+
+@keyframes sparkle {
+  0%, 100% {
+    opacity: 0;
+    transform: scale(1) translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.5) translateY(-12px);
+  }
+}

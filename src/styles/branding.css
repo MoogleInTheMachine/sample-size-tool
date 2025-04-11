@@ -1,0 +1,16 @@
+@keyframes pulse-glow {
+    0%, 100% {
+      opacity: 0.4;
+      transform: scale(1);
+      filter: blur(24px);
+    }
+    50% {
+      opacity: 0.75;
+      transform: scale(1.05);
+      filter: blur(32px);
+    }
+  }
+  
+  .animate-pulse-glow {
+    animation: pulse-glow 3.5s ease-in-out infinite;
+  }
