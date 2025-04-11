@@ -17,16 +17,7 @@ import {
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-/**
- * Calculate the estimated confidence level based on the sample and population sizes,
- * comparing the margin of error at various confidence levels against the target margin.
- */
-function calculateConfidenceLevel(
-  sampleSize: number,
-  populationSize: number,
-  marginTarget: number,
-  p = 0.5
-) {
+function calculateConfidenceLevel(sampleSize: number, populationSize: number, marginTarget: number, p = 0.5) {
   if (sampleSize === 0 || populationSize === 0 || sampleSize > populationSize) return 0;
 
   const zValues = {
@@ -53,9 +44,6 @@ function calculateConfidenceLevel(
   return closest.confidence;
 }
 
-/**
- * Returns an explanation message based on the provided sample and population sizes.
- */
 function getExplanation(sampleSize: number, populationSize: number) {
   if (sampleSize === 0) return 'You need at least one response to calculate a confidence interval.';
   if (sampleSize > populationSize) return 'Sample size cannot exceed the population size.';
@@ -63,17 +51,7 @@ function getExplanation(sampleSize: number, populationSize: number) {
   return `With a sample size of ${sampleSize}, the app estimates how confident you can be that your survey results reflect the views of the full population of ${populationSize} people. Larger sample sizes reduce uncertainty and give you a tighter margin of error.`;
 }
 
-/**
- * Calculates the required sample size given a desired margin of error,
- * z-score, population size, and a flag for finite population correction.
- */
-function requiredSampleSize(
-  margin: number,
-  z: number,
-  populationSize: number,
-  p = 0.5,
-  finiteCorrection = true
-) {
+function requiredSampleSize(margin: number, z: number, populationSize: number, p = 0.5, finiteCorrection = true) {
   const n0 = (z ** 2 * p * (1 - p)) / (margin ** 2);
   return Math.ceil(finiteCorrection ? n0 / (1 + (n0 - 1) / populationSize) : n0);
 }
@@ -82,22 +60,22 @@ export default function SampleSizeCalculator() {
   const [populationSize, setPopulationSize] = useState(1000);
   const [sampleSize, setSampleSize] = useState(100);
   const [costPerResponse, setCostPerResponse] = useState(0);
-  const [marginOfErrorTarget, setMarginOfErrorTarget] = useState(0.05); // Target margin error (5% default)
+  const [marginOfErrorTarget, setMarginOfErrorTarget] = useState(0.05);
   const [useFiniteCorrection, setUseFiniteCorrection] = useState(true);
   const [showPercent, setShowPercent] = useState(false);
   const [error, setError] = useState('');
 
-  // Generic input handler for numeric values.
+  const safeValue = (v: number) => (isNaN(v) ? '' : v);
+
   const handleInputChange = (setter: React.Dispatch<React.SetStateAction<number>>) =>
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const raw = e.target.value;
-  
-      // Allow clearing the input
+
       if (raw === "") {
         setter(NaN);
         return;
       }
-  
+
       const value = Number(raw);
       if (isNaN(value)) {
         setError("Please enter a valid number.");
@@ -111,14 +89,12 @@ export default function SampleSizeCalculator() {
   const explanation = getExplanation(sampleSize, populationSize);
   const totalCost = costPerResponse * sampleSize;
 
-  // Confidence levels and their associated z values.
   const levels = [
     { level: '85%', z: 1.44 },
     { level: '90%', z: 1.645 },
     { level: '95%', z: 1.96 },
   ];
 
-  // Build table rows using the correct z value for each level.
   const tableRows = levels.map(({ level, z }) => {
     const size = requiredSampleSize(marginOfErrorTarget, z, populationSize, 0.5, useFiniteCorrection);
     const isMet = sampleSize >= size;
@@ -131,7 +107,6 @@ export default function SampleSizeCalculator() {
     );
   });
 
-  // Update chart data to compare "Your Sample Size" vs "Required Sample Size" per confidence level.
   const chartData = {
     labels: levels.map((l) => l.level),
     datasets: [
@@ -177,7 +152,7 @@ export default function SampleSizeCalculator() {
               <label className="block text-sm font-semibold mb-1">Population Size</label>
               <Input
                 type="number"
-                value={populationSize}
+                value={safeValue(populationSize)}
                 onChange={handleInputChange(setPopulationSize)}
                 step={100}
                 min={1}
@@ -189,7 +164,7 @@ export default function SampleSizeCalculator() {
               <label className="block text-sm font-semibold mb-1">Sample Size</label>
               <Input
                 type="number"
-                value={sampleSize}
+                value={safeValue(sampleSize)}
                 onChange={handleInputChange(setSampleSize)}
                 min={0}
                 max={5000}
@@ -201,7 +176,7 @@ export default function SampleSizeCalculator() {
               <label className="block text-sm font-semibold mb-1">Cost Per Response ($)</label>
               <Input
                 type="number"
-                value={costPerResponse}
+                value={safeValue(costPerResponse)}
                 onChange={handleInputChange(setCostPerResponse)}
                 min={0}
                 step={1}
