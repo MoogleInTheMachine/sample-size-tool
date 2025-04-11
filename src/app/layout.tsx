@@ -15,9 +15,6 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Moogle in the Machine",
   description: "A growing collection of UX research tools that bring clarity, confidence, and statistical insight to your work.",
-  icons: {
-    icon: "/favicon-v2.ico",
-  },
 };
 
 export default function RootLayout({
@@ -27,11 +24,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
-      </body>
-    </html>
+    <head>
+      <link rel="icon" href="/favicon-v2.ico" />
+    </head>
+    <body
+      className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+    >
+      {children}
+    </body>
+  </html>
   );
 }
