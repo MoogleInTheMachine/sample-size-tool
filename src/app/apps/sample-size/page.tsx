@@ -14,6 +14,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
+import type { ChartData, ChartOptions } from 'chart.js';
 import { useTheme } from 'next-themes';
 
 
@@ -48,8 +49,11 @@ export default function SampleSizeCalculator() {
   const [useFiniteCorrection, setUseFiniteCorrection] = useState(true);
   const [showPercent, setShowPercent] = useState(false);
   const [error, setError] = useState('');
-  const [chartOptions, setChartOptions] = useState({});
-  const [chartData, setChartData] = useState({ labels: [], datasets: [] });
+  const [chartOptions, setChartOptions] = useState<ChartOptions<'bar'>>({});
+const [chartData, setChartData] = useState<ChartData<'bar'>>({
+  labels: [],
+  datasets: [],
+});
 
   const handleInputChange = (setter: React.Dispatch<React.SetStateAction<number>>) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value;
@@ -143,7 +147,7 @@ export default function SampleSizeCalculator() {
     setChartData(data);
     setChartOptions(options);
   }, [theme, sampleSize, populationSize, marginOfErrorTarget, useFiniteCorrection]);
-  
+
   return (
     <div className="relative min-h-screen px-4 py-8 max-w-3xl mx-auto bg-white text-black dark:bg-[#0f0f23] dark:text-white transition-colors overflow-hidden">
       <div className="absolute inset-0 pointer-events-none z-0">
