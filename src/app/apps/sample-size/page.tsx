@@ -18,6 +18,7 @@ import type { ChartData, ChartOptions } from 'chart.js';
 import { useTheme } from 'next-themes';
 
 
+
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 function calculateConfidenceLevel(sampleSize: number, populationSize: number, marginTarget: number, p = 0.5) {
@@ -117,14 +118,14 @@ const [chartData, setChartData] = useState<ChartData<'bar'>>({
       ],
     };
   
-    const options = {
+    const options: ChartOptions<'bar'> = {
       responsive: true,
       plugins: {
         legend: {
           labels: {
             color: theme === 'dark' ? '#FFFFFF' : '#1F2937',
           },
-          position: 'top',
+          position: 'top' as const, // 👈 fix applied here
         },
         title: {
           display: true,
