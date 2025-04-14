@@ -42,14 +42,16 @@ export default function Navbar() {
         </Link>
 
         {mounted && (
-          <button
-            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-            className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-accent-purple transition"
-          >
-            {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
-            {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
-          </button>
-        )}
+  <select
+    value={theme}
+    onChange={(e) => setTheme(e.target.value)}
+    className="bg-transparent border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-sm font-medium text-gray-700 dark:text-gray-300"
+  >
+    <option value="light">☀️ Light</option>
+    <option value="dark">🌙 Dark</option>
+    <option value="system">🖥 System</option>
+  </select>
+)}
       </div>
     </nav>
   );

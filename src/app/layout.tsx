@@ -24,7 +24,7 @@ export default function ToolsLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white text-black dark:bg-[#0f0f23] dark:text-white`}
       >
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
           <Navbar />
           <div className="min-h-screen font-sans p-4">
             <main className="max-w-3xl mx-auto">{children}</main>
