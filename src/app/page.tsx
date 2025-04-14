@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import "@/styles/sparkles.css"; // Import animation styles
 import "@/styles/branding.css"; // Import branding styles (contains pulse)
+import ToolCards from "@/components/ToolCards"; // Import tool cards grid 
 
 export default function Home() {
   return (
@@ -40,14 +41,8 @@ export default function Home() {
         </p>
       </div>
 
-      {/* CTA Section */}
-      <div className="mt-10 flex justify-center relative z-10">
-        <Link href="/apps/sample-size">
-          <div className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-xl text-lg shadow-md transition">
-            Try the Sample Size Calculator →
-          </div>
-        </Link>
-      </div>
+     {/* Tool Cards Section */}
+      <ToolCards />
     </main>
   );
 }
