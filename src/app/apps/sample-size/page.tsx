@@ -16,6 +16,7 @@ import {
 } from 'chart.js';
 import { useTheme } from 'next-themes';
 
+
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 function calculateConfidenceLevel(sampleSize: number, populationSize: number, marginTarget: number, p = 0.5) {
@@ -81,11 +82,17 @@ export default function SampleSizeCalculator() {
   });
 
   useEffect(() => {
+    const levels = [
+      { level: '85%', z: 1.44 },
+      { level: '90%', z: 1.645 },
+      { level: '95%', z: 1.96 },
+    ];
+  
     const neonBlue = 'rgba(0, 255, 255, 0.3)';
     const neonPink = 'rgba(255, 0, 255, 0.3)';
     const blueBorder = '#00FFFF';
     const pinkBorder = '#FF00FF';
-
+  
     const data = {
       labels: levels.map((l) => l.level),
       datasets: [
@@ -105,7 +112,7 @@ export default function SampleSizeCalculator() {
         },
       ],
     };
-
+  
     const options = {
       responsive: true,
       plugins: {
@@ -132,11 +139,11 @@ export default function SampleSizeCalculator() {
         },
       },
     };
-
+  
     setChartData(data);
     setChartOptions(options);
   }, [theme, sampleSize, populationSize, marginOfErrorTarget, useFiniteCorrection]);
-
+  
   return (
     <div className="relative min-h-screen px-4 py-8 max-w-3xl mx-auto bg-white text-black dark:bg-[#0f0f23] dark:text-white transition-colors overflow-hidden">
       <div className="absolute inset-0 pointer-events-none z-0">

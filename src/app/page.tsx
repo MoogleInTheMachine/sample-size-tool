@@ -1,5 +1,4 @@
 import Image from "next/image";
-import Link from "next/link";
 import "@/styles/sparkles.css"; // Import animation styles
 import "@/styles/branding.css"; // Import branding styles (contains pulse)
 import ToolCards from "@/components/ToolCards"; // Import tool cards grid 
