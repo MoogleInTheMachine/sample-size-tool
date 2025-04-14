@@ -19,35 +19,16 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
 function calculateConfidenceLevel(sampleSize: number, populationSize: number, marginTarget: number, p = 0.5) {
   if (sampleSize === 0 || populationSize === 0 || sampleSize > populationSize) return 0;
-
-  const zValues = {
-    0.80: 1.28,
-    0.85: 1.44,
-    0.90: 1.645,
-    0.95: 1.96,
-    0.99: 2.576,
-  };
-
-  const marginOfError = (z: number) =>
-    z * Math.sqrt((p * (1 - p)) / sampleSize) * Math.sqrt((populationSize - sampleSize) / (populationSize - 1));
-
-  const testZs = Object.entries(zValues).map(([conf, z]) => {
-    return { confidence: parseFloat(conf), moe: marginOfError(z) };
-  });
-
-  const closest = testZs.reduce(
-    (prev, curr) =>
-      curr.moe <= marginTarget && curr.confidence > prev.confidence ? curr : prev,
-    { confidence: 0 }
-  );
-
+  const zValues = { 0.80: 1.28, 0.85: 1.44, 0.90: 1.645, 0.95: 1.96, 0.99: 2.576 };
+  const marginOfError = (z: number) => z * Math.sqrt((p * (1 - p)) / sampleSize) * Math.sqrt((populationSize - sampleSize) / (populationSize - 1));
+  const testZs = Object.entries(zValues).map(([conf, z]) => ({ confidence: parseFloat(conf), moe: marginOfError(z) }));
+  const closest = testZs.reduce((prev, curr) => curr.moe <= marginTarget && curr.confidence > prev.confidence ? curr : prev, { confidence: 0 });
   return closest.confidence;
 }
 
 function getExplanation(sampleSize: number, populationSize: number) {
   if (sampleSize === 0) return 'You need at least one response to calculate a confidence interval.';
   if (sampleSize > populationSize) return 'Sample size cannot exceed the population size.';
-
   return `With a sample size of ${sampleSize}, the app estimates how confident you can be that your survey results reflect the views of the full population of ${populationSize} people. Larger sample sizes reduce uncertainty and give you a tighter margin of error.`;
 }
 
@@ -57,37 +38,36 @@ function requiredSampleSize(margin: number, z: number, populationSize: number, p
 }
 
 export default function SampleSizeCalculator() {
-  const [populationSize, setPopulationSize] = useState(1000);
-  const [sampleSize, setSampleSize] = useState(100);
-  const [costPerResponse, setCostPerResponse] = useState(0);
+  const [populationSize, setPopulationSize] = useState<number | ''>(1000);
+  const [sampleSize, setSampleSize] = useState<number | ''>(100);
+  const [costPerResponse, setCostPerResponse] = useState<number | ''>(0);
   const [marginOfErrorTarget, setMarginOfErrorTarget] = useState(0.05);
   const [useFiniteCorrection, setUseFiniteCorrection] = useState(true);
   const [showPercent, setShowPercent] = useState(false);
   const [error, setError] = useState('');
 
-  const safeValue = (v: number) => (isNaN(v) ? '' : v);
+  const handleInputChange = (setter: React.Dispatch<React.SetStateAction<number | ''>>) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value;
+    if (raw === '') {
+      setter('');
+      return;
+    }
+    const value = Number(raw);
+    if (isNaN(value)) {
+      setError('Please enter a valid number.');
+    } else {
+      setError('');
+      setter(value);
+    }
+  };
 
-  const handleInputChange = (setter: React.Dispatch<React.SetStateAction<number>>) =>
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const raw = e.target.value;
+  const numericSampleSize = typeof sampleSize === 'number' ? sampleSize : 0;
+  const numericPopulationSize = typeof populationSize === 'number' ? populationSize : 0;
+  const numericCost = typeof costPerResponse === 'number' ? costPerResponse : 0;
 
-      if (raw === "") {
-        setter(NaN);
-        return;
-      }
-
-      const value = Number(raw);
-      if (isNaN(value)) {
-        setError("Please enter a valid number.");
-      } else {
-        setError("");
-        setter(value);
-      }
-    };
-
-  const confidenceLevel = calculateConfidenceLevel(sampleSize, populationSize, marginOfErrorTarget);
-  const explanation = getExplanation(sampleSize, populationSize);
-  const totalCost = costPerResponse * sampleSize;
+  const confidenceLevel = calculateConfidenceLevel(numericSampleSize, numericPopulationSize, marginOfErrorTarget);
+  const explanation = getExplanation(numericSampleSize, numericPopulationSize);
+  const totalCost = numericCost * numericSampleSize;
 
   const levels = [
     { level: '85%', z: 1.44 },
@@ -96,13 +76,13 @@ export default function SampleSizeCalculator() {
   ];
 
   const tableRows = levels.map(({ level, z }) => {
-    const size = requiredSampleSize(marginOfErrorTarget, z, populationSize, 0.5, useFiniteCorrection);
-    const isMet = sampleSize >= size;
-    const value = showPercent ? ((sampleSize / size) * 100).toFixed(1) + '%' : size.toLocaleString();
+    const size = requiredSampleSize(marginOfErrorTarget, z, numericPopulationSize, 0.5, useFiniteCorrection);
+    const isMet = numericSampleSize >= size;
+    const value = showPercent ? ((numericSampleSize / size) * 100).toFixed(1) + '%' : size.toLocaleString();
     return (
-      <tr key={level} className={isMet ? 'bg-green-100 font-semibold' : ''}>
-        <td className="border px-2 py-1">{level}</td>
-        <td className="border px-2 py-1">{value}</td>
+      <tr key={level} className={isMet ? 'bg-green-800/40 font-semibold' : ''}>
+        <td className="border border-slate-700 px-2 py-1">{level}</td>
+        <td className="border border-slate-700 px-2 py-1">{value}</td>
       </tr>
     );
   });
@@ -112,14 +92,12 @@ export default function SampleSizeCalculator() {
     datasets: [
       {
         label: 'Your Sample Size',
-        data: levels.map(() => sampleSize),
+        data: levels.map(() => numericSampleSize),
         backgroundColor: 'rgba(59, 130, 246, 0.6)',
       },
       {
         label: 'Required Sample Size',
-        data: levels.map(({ z }) =>
-          requiredSampleSize(marginOfErrorTarget, z, populationSize, 0.5, useFiniteCorrection)
-        ),
+        data: levels.map(({ z }) => requiredSampleSize(marginOfErrorTarget, z, numericPopulationSize, 0.5, useFiniteCorrection)),
         backgroundColor: 'rgba(234, 88, 12, 0.6)',
       },
     ],
@@ -139,50 +117,47 @@ export default function SampleSizeCalculator() {
   };
 
   return (
-    <div className="max-w-xl mx-auto p-4 space-y-6">
-      <h1 className="text-2xl font-bold mb-1">Sample Size Confidence Estimator</h1>
-      <p className="text-sm text-gray-600">
+    <div className="space-y-6">
+      <h1 className="text-3xl font-bold mb-1 text-[var(--accent)]">Sample Size Confidence Estimator</h1>
+      <p className="text-sm text-[var(--text-muted)]">
         Quickly estimate how confident you can be in your survey results based on your sample size, population, and margin of error preferences.
       </p>
 
-      <Card>
+      <Card className="bg-[var(--panel)] border border-[var(--border)]">
         <CardContent className="space-y-6 py-6">
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-semibold mb-1">Population Size</label>
               <Input
                 type="number"
-                value={safeValue(populationSize)}
+                value={populationSize}
                 onChange={handleInputChange(setPopulationSize)}
                 step={100}
                 min={1}
                 max={1000000}
               />
             </div>
-
             <div>
               <label className="block text-sm font-semibold mb-1">Sample Size</label>
               <Input
                 type="number"
-                value={safeValue(sampleSize)}
+                value={sampleSize}
                 onChange={handleInputChange(setSampleSize)}
                 min={0}
                 max={5000}
                 step={10}
               />
             </div>
-
             <div>
               <label className="block text-sm font-semibold mb-1">Cost Per Response ($)</label>
               <Input
                 type="number"
-                value={safeValue(costPerResponse)}
+                value={costPerResponse}
                 onChange={handleInputChange(setCostPerResponse)}
                 min={0}
                 step={1}
               />
             </div>
-
             <div>
               <label className="block text-sm font-semibold mb-1 flex items-center gap-1">
                 Target Margin of Error (%)
@@ -217,14 +192,13 @@ export default function SampleSizeCalculator() {
               <span className="text-sm flex items-center gap-1">
                 Apply finite population correction
                 <span
-                  title="This adjusts the required sample size when your population is small. If you're surveying a limited group (like employees or beta testers), this makes results more accurate."
+                  title="This adjusts the required sample size when your population is small."
                   className="text-gray-500"
                 >
                   <Info size={16} />
                 </span>
               </span>
             </label>
-
             <label className="inline-flex items-center space-x-2">
               <input
                 type="checkbox"
@@ -248,7 +222,7 @@ export default function SampleSizeCalculator() {
         </strong>
       </div>
 
-      <div className="text-md text-gray-700">{explanation}</div>
+      <div className="text-md text-gray-300">{explanation}</div>
 
       <div className="text-md">
         Estimated Study Cost: <strong>${totalCost.toLocaleString()}</strong>
@@ -258,17 +232,17 @@ export default function SampleSizeCalculator() {
         <Bar data={chartData} options={chartOptions} />
       </div>
 
-      <div className="text-md text-gray-700">
-        <h2 className="font-semibold text-md mt-6 mb-2">Sample Size Recommendations (Always Visible)</h2>
+      <div className="text-md text-gray-300">
+        <h2 className="font-semibold text-md mt-6 mb-2">Sample Size Recommendations</h2>
         <p className="mb-2">
           To reach common confidence levels with your selected margin of error ({(marginOfErrorTarget * 100).toFixed(1)}%) and population
-          size of {populationSize.toLocaleString()}, you would need approximately:
+          size of {numericPopulationSize.toLocaleString()}, you would need approximately:
         </p>
-        <table className="border text-sm w-full">
+        <table className="border border-slate-700 text-sm w-full">
           <thead>
             <tr>
-              <th className="border px-2 py-1">Confidence Level</th>
-              <th className="border px-2 py-1">
+              <th className="border border-slate-700 px-2 py-1">Confidence Level</th>
+              <th className="border border-slate-700 px-2 py-1">
                 {showPercent ? 'Your Sample vs Target (%)' : 'Required Sample Size'}
               </th>
             </tr>

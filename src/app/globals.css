@@ -120,3 +120,15 @@
     @apply bg-background text-foreground;
   }
 }
+
+:root {
+  --bg: #f9fafb;
+  --text: #111827;
+  --card-bg: #ffffff;
+}
+
+[data-theme='dark'] {
+  --bg: #0f0f23;
+  --text: #ffffff;
+  --card-bg: #1f1f3a;
+}
