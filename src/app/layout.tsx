@@ -17,6 +17,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Moogle in the Machine",
   description: "A growing collection of UX research tools to support UX researchers and designers.",
+  icons: {
+    icon: "/favicon.ico",
+  },
   openGraph: {
     title: "Moogle in the Machine",
     description: "A growing collection of UX research tools to support UX researchers and designers.",
