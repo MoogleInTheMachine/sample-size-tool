@@ -1,6 +1,10 @@
 // src/lib/aiBiasChecker.ts
 import { pipeline } from '@xenova/transformers';
 
+if (!globalThis.process) {
+  // @ts-ignore
+  globalThis.process = { env: {} };
+}
 // Ensure this only runs client-side
 let classifier: any = null;
 
