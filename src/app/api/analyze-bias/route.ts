@@ -1,8 +1,8 @@
 // src/app/api/analyze-bias/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { pipeline } from '@xenova/transformers';
-import type { ZeroShotClassificationPipeline } from '@xenova/transformers';
-let classifier: ZeroShotClassificationPipeline | null = null;
+
+let classifier: any = null;
 
 export async function POST(req: NextRequest) {
   const { input, context } = await req.json();
@@ -22,12 +22,13 @@ export async function POST(req: NextRequest) {
 
   const fullInput = context ? `${input}\n\nContext:\n${context}` : input;
 
-  const result = await classifier(fullInput, labels) as ZeroShotClassificationOutput;
-  // optional safety check 
+  const result = await classifier(fullInput, labels);
+
+  // Optional safety check
   if (Array.isArray(result)) {
     throw new Error("Expected a single classification result, but got an array.");
   }
-  
+
   const topLabel = result.labels[0];
 
   const suggestionMap: Record<string, string> = {
