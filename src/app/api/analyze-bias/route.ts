@@ -44,10 +44,11 @@ export async function POST(req: NextRequest) {
       biasTypes: topLabel !== 'No bias detected' ? [topLabel] : [],
       suggestion: suggestionMap[topLabel] || '',
     });
-  } catch (error: any) {
-    console.error('API error in /analyze-bias:', error);
+  } catch (error) {
+    const err = error as Error;
+    console.error('API error in /analyze-bias:', err);
     return new NextResponse(
-      JSON.stringify({ error: 'Something went wrong on the server.', detail: error.message }),
+      JSON.stringify({ error: 'Something went wrong on the server.', detail: err.message }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
