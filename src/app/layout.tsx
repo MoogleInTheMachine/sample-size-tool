@@ -1,8 +1,8 @@
-// src/app/apps/layout.tsx
 import { Geist, Geist_Mono } from "next/font/google";
 import "@/app/globals.css";
 import Navbar from "@/components/Navbar";
 import { ThemeProvider } from "next-themes";
+import type { Metadata } from "next";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,7 +14,33 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export default function ToolsLayout({
+export const metadata: Metadata = {
+  title: "Moogle in the Machine",
+  description: "A growing collection of UX research tools to support UX researchers and designers.",
+  openGraph: {
+    title: "Moogle in the Machine",
+    description: "A growing collection of UX research tools to support UX researchers and designers.",
+    url: "https://moogleinthemachine.com",
+    siteName: "Moogle in the Machine",
+    images: [
+      {
+        url: "/moogle-og.png", // Make sure this file exists in /public
+        width: 1200,
+        height: 630,
+        alt: "Moogle in the Machine Open Graph Image",
+      },
+    ],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Moogle in the Machine",
+    description: "UX research tools to boost confidence and reduce imposter syndrome.",
+    images: ["/moogle-og.png"],
+  },
+};
+
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
