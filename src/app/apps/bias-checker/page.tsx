@@ -22,6 +22,7 @@ export default function BiasCheckerPage() {
     setResult(null); // reset previous result 
     setLoading(true);
    
+    console.log('Submitting:', { input, context }); // Debugging log
 
     try {
       const res = await fetch('/api/analyze-bias', {
@@ -33,6 +34,7 @@ export default function BiasCheckerPage() {
       if (!res.ok) throw new Error('API request failed');
 
       const data = await res.json();
+      console.log('API response:', data); // Log the API response
       setResult(data);
     } catch (err) {
       console.error('Error:', err);
