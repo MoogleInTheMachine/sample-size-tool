@@ -22,7 +22,12 @@ export async function POST(req: NextRequest) {
 
   const fullInput = context ? `${input}\n\nContext:\n${context}` : input;
 
-  const result = await classifier(fullInput, labels);
+  const result = await classifier(fullInput, labels) as ZeroShotClassificationOutput;
+  // optional safety check 
+  if (Array.isArray(result)) {
+    throw new Error("Expected a single classification result, but got an array.");
+  }
+  
   const topLabel = result.labels[0];
 
   const suggestionMap: Record<string, string> = {
