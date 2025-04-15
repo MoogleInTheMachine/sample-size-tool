@@ -1,4 +1,5 @@
 export const runtime = 'nodejs';
+process.env.HF_CACHE = '/tmp/transformers';
 import { NextRequest, NextResponse } from 'next/server';
 import { pipeline } from '@xenova/transformers';
 import type { ZeroShotClassificationPipeline } from '@xenova/transformers';
