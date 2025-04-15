@@ -4,12 +4,20 @@ export const maxDuration = 20;
 import { NextRequest, NextResponse } from 'next/server';
 import { pipeline } from '@xenova/transformers';
 import type { ZeroShotClassificationPipeline } from '@xenova/transformers';
+import fs from 'fs';
+import path from 'path';
 
 let classifier: ZeroShotClassificationPipeline | null = null;
 
 export async function POST(req: NextRequest) {
   try {
     const { input, context } = await req.json();
+
+    // Ensure cache directory exists for Xenova model
+    const cacheDir = path.join(process.cwd(), 'node_modules', '@xenova', 'transformers', '.cache');
+    if (!fs.existsSync(cacheDir)) {
+      fs.mkdirSync(cacheDir, { recursive: true });
+    }
 
     if (!classifier) {
       classifier = await pipeline(
