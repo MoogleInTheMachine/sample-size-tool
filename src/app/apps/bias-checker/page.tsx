@@ -48,7 +48,7 @@ export default function BiasCheckerPage() {
     };
   
     return (
-      <div className="max-w-2xl mx-auto py-12 px-4 space-y-6 text-black dark:text-white">
+      <div className="max-w-4xl mx-auto py-12 px-4 space-y-6 text-black dark:text-white">
         <h1 className="text-2xl font-bold">Research Question Bias Checker</h1>
         <p className="text-sm text-gray-700 dark:text-gray-300">
           Paste a survey or interview question below and we’ll flag any potential bias in the wording.

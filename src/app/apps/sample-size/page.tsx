@@ -150,7 +150,7 @@ const [chartData, setChartData] = useState<ChartData<'bar'>>({
   }, [theme, sampleSize, populationSize, marginOfErrorTarget, useFiniteCorrection]);
 
   return (
-    <div className="relative min-h-screen px-4 py-8 max-w-3xl mx-auto bg-white text-black dark:bg-[#0f0f23] dark:text-white transition-colors overflow-hidden">
+    <div className="relative min-h-screen px-4 py-8 max-w-4xl mx-auto bg-white text-black dark:bg-[#0f0f23] dark:text-white transition-colors overflow-hidden">
       <div className="absolute inset-0 pointer-events-none z-0">
         <div className="sparkle sparkle-1 teal" />
         <div className="sparkle sparkle-2 blue" />
