@@ -1,14 +1,15 @@
 // src/app/api/analyze-bias/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { pipeline } from '@xenova/transformers';
+import type { ZeroShotClassificationPipeline } from '@xenova/transformers';
 
-let classifier: any = null;
+let classifier: ZeroShotClassificationPipeline | null = null;
 
 export async function POST(req: NextRequest) {
   const { input, context } = await req.json();
 
   if (!classifier) {
-    classifier = await pipeline('zero-shot-classification', 'Xenova/bart-large-mnli');
+    classifier = await pipeline('zero-shot-classification', 'Xenova/bart-large-mnli') as ZeroShotClassificationPipeline;
   }
 
   const labels = [
@@ -24,7 +25,6 @@ export async function POST(req: NextRequest) {
 
   const result = await classifier(fullInput, labels);
 
-  // Optional safety check
   if (Array.isArray(result)) {
     throw new Error("Expected a single classification result, but got an array.");
   }
