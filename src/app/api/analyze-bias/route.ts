@@ -1,4 +1,4 @@
-// src/app/api/analyze-bias/route.ts
+export const runtime = 'nodejs';
 import { NextRequest, NextResponse } from 'next/server';
 import { pipeline } from '@xenova/transformers';
 import type { ZeroShotClassificationPipeline } from '@xenova/transformers';
@@ -6,42 +6,49 @@ import type { ZeroShotClassificationPipeline } from '@xenova/transformers';
 let classifier: ZeroShotClassificationPipeline | null = null;
 
 export async function POST(req: NextRequest) {
-  const { input, context } = await req.json();
+  try {
+    const { input, context } = await req.json();
 
-  if (!classifier) {
-    classifier = await pipeline('zero-shot-classification', 'Xenova/bart-large-mnli') as ZeroShotClassificationPipeline;
+    if (!classifier) {
+      classifier = await pipeline('zero-shot-classification', 'Xenova/bart-large-mnli') as ZeroShotClassificationPipeline;
+    }
+
+    const labels = [
+      'Leading bias',
+      'Loaded language',
+      'Double-barreled question',
+      'Negative framing',
+      'Absolute language',
+      'No bias detected',
+    ];
+
+    const fullInput = context ? `${input}\n\nContext:\n${context}` : input;
+    const result = await classifier(fullInput, labels);
+
+    if (Array.isArray(result)) {
+      throw new Error("Expected a single classification result, but got an array.");
+    }
+
+    const topLabel = result.labels[0];
+
+    const suggestionMap: Record<string, string> = {
+      'Leading bias': 'Try rephrasing as an open-ended question.',
+      'Loaded language': 'Consider using more neutral terms.',
+      'Double-barreled question': 'Split this into two separate questions.',
+      'Negative framing': 'Try framing the question in a more neutral or positive way.',
+      'Absolute language': "Avoid words like 'always' or 'never' unless truly accurate.",
+    };
+
+    return NextResponse.json({
+      biasDetected: topLabel !== 'No bias detected',
+      biasTypes: topLabel !== 'No bias detected' ? [topLabel] : [],
+      suggestion: suggestionMap[topLabel] || '',
+    });
+  } catch (error: any) {
+    console.error('API error in /analyze-bias:', error);
+    return new NextResponse(
+      JSON.stringify({ error: 'Something went wrong on the server.', detail: error.message }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    );
   }
-
-  const labels = [
-    'Leading bias',
-    'Loaded language',
-    'Double-barreled question',
-    'Negative framing',
-    'Absolute language',
-    'No bias detected',
-  ];
-
-  const fullInput = context ? `${input}\n\nContext:\n${context}` : input;
-
-  const result = await classifier(fullInput, labels);
-
-  if (Array.isArray(result)) {
-    throw new Error("Expected a single classification result, but got an array.");
-  }
-
-  const topLabel = result.labels[0];
-
-  const suggestionMap: Record<string, string> = {
-    'Leading bias': 'Try rephrasing as an open-ended question.',
-    'Loaded language': 'Consider using more neutral terms.',
-    'Double-barreled question': 'Split this into two separate questions.',
-    'Negative framing': 'Try framing the question in a more neutral or positive way.',
-    'Absolute language': "Avoid words like 'always' or 'never' unless truly accurate.",
-  };
-
-  return NextResponse.json({
-    biasDetected: topLabel !== 'No bias detected',
-    biasTypes: topLabel !== 'No bias detected' ? [topLabel] : [],
-    suggestion: suggestionMap[topLabel] || '',
-  });
 }

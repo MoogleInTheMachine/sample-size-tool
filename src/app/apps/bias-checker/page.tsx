@@ -52,7 +52,7 @@ export default function BiasCheckerPage() {
       </p>
 
       <div className="border-l-4 border-yellow-400 bg-yellow-100 dark:bg-yellow-800/30 text-yellow-900 dark:text-yellow-200 p-4 rounded text-sm">
-        <strong>⚠️ Work-in-Progress:</strong> This tool is still under construction. The logic used to detect bias is incomplete and may produce incorrect or missing results. Once the core logic is finalized, this disclaimer will be removed. For now, treat all feedback as experimental.
+        <strong>⚠️ Work-in-Progress:</strong> This tool is still under construction. The logic used to detect bias is incomplete and may produce incorrect or missing results. Once the core logic is finalized, this disclaimer will be removed. For now, treat all feedback as experimental. In the long run i plan to connect this to a paid AI tool but for now its kinda bad at its job 
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
