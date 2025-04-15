@@ -1,8 +1,8 @@
 // src/app/api/analyze-bias/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { pipeline } from '@xenova/transformers';
-
-let classifier: any = null;
+import type { ZeroShotClassificationPipeline } from '@xenova/transformers';
+let classifier: ZeroShotClassificationPipeline | null = null;
 
 export async function POST(req: NextRequest) {
   const { input, context } = await req.json();
@@ -24,7 +24,6 @@ export async function POST(req: NextRequest) {
 
   const result = await classifier(fullInput, labels);
   const topLabel = result.labels[0];
-  const topScore = result.scores[0];
 
   const suggestionMap: Record<string, string> = {
     'Leading bias': 'Try rephrasing as an open-ended question.',
