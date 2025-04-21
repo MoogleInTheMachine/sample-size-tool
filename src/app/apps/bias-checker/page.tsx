@@ -51,7 +51,7 @@ export default function BiasCheckerPage() {
         Paste a survey or interview question below and we’ll flag any potential bias in the wording.
       </p>
 
-      <div className="border-l-4 border-yellow-400 bg-yellow-100 dark:bg-yellow-800/30 text-yellow-900 dark:text-yellow-200 p-4 rounded text-sm">
+      <div className="border-l-4 border-red-500 bg-red-100 dark:bg-red-800/30 text-red-900 dark:text-red-200 p-4 rounded text-sm">
         <strong>⚠️ Work-in-Progress:</strong> This tool is still under construction. The logic used to detect bias is incomplete and may produce incorrect or missing results. Once the core logic is finalized, this disclaimer will be removed. For now, treat all feedback as experimental. In the long run i plan to connect this to a paid AI tool but for now its kinda bad at its job 
       </div>
 
