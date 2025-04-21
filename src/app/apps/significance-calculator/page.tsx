@@ -26,13 +26,6 @@ function isSignificant(z: number, threshold = 1.96) {
   return Math.abs(z) > threshold;
 }
 
-function getConfidenceInterval(p: number, n: number, z = 1.96) {
-  const se = Math.sqrt((p * (1 - p)) / n);
-  return {
-    lower: Math.max(0, p - z * se),
-    upper: Math.min(1, p + z * se),
-  };
-}
 
 export default function SignificanceCalculator() {
   const { theme } = useTheme();
@@ -63,7 +56,6 @@ export default function SignificanceCalculator() {
       setZScore(z);
       setSignificant(isSignificant(z));
 
-      const zLookup: Record<number, number> = { 0.90: 1.645, 0.95: 1.96, 0.98: 2.33, 0.99: 2.58 };
 
       const neonCyan = 'rgba(0, 255, 255, 0.3)';
       const neonPurple = 'rgba(255, 0, 255, 0.3)';
