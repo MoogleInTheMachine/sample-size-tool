@@ -64,8 +64,6 @@ export default function SignificanceCalculator() {
       setSignificant(isSignificant(z));
 
       const zLookup: Record<number, number> = { 0.90: 1.645, 0.95: 1.96, 0.98: 2.33, 0.99: 2.58 };
-      const ci1 = getConfidenceInterval(rate1, n1, zLookup[confidenceLevel]);
-      const ci2 = getConfidenceInterval(rate2, n2, zLookup[confidenceLevel]);
 
       const neonCyan = 'rgba(0, 255, 255, 0.3)';
       const neonPurple = 'rgba(255, 0, 255, 0.3)';
@@ -126,7 +124,7 @@ export default function SignificanceCalculator() {
       setSignificant(null);
       setChartData({ labels: [], datasets: [] });
     }
-  }, [group1Success, group1Total, group2Success, group2Total, theme, confidenceLevel]);
+  }, [group1Success, group1Total, group2Success, group2Total, theme, confidenceLevel, rate1, rate2]);
 
   const handleClear = () => {
     setGroup1Success('');
