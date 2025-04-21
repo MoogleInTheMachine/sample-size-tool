@@ -15,6 +15,12 @@ export default function ToolCards() {
         "Identify leading or biased language in your research questions and get suggestions for neutral phrasing.",
       href: "/apps/bias-checker",
     },
+    {
+      title: "Significance Calculator",
+      description:
+        "Compare success rates between two groups to determine statistical significance.",
+      href: "/apps/significance-calculator",
+    },
   ];
 
   return (
