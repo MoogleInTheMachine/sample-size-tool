@@ -175,7 +175,7 @@ export default function SignificanceCalculator() {
           </select>
         </div>
         <div className="flex gap-4">
-          <Button type="button" onClick={handleClear} variant="outline">Clear</Button>
+          <Button type="button" onClick={handleClear} className="border border-gray-300 dark:border-gray-600">Clear</Button>
           <Button type="button" onClick={handleDownloadChart}>Download Chart</Button>
         </div>
       </form>
