@@ -9,7 +9,7 @@ export default function AboutPage() {
 
       <section className="space-y-4">
         <p>
-          <strong>Hi, I’m Rene.</strong> I’m a UX researcher with over seven years of experience working across
+           Hi!I’m a UX researcher with over seven years of experience working across
           industries like software-as-a-service, telecommunications, and financial services. My background is
           actually in fine arts—and I’ve always believed that creativity and curiosity are just as essential to UX
           as frameworks and data.
