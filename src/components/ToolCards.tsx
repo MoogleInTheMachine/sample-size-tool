@@ -18,8 +18,14 @@ export default function ToolCards() {
     {
       title: "Significance Calculator",
       description:
-        "Compare success rates between two groups to determine statistical significance.",
+        "Compare success rates between two or more groups to determine statistical significance.",
       href: "/apps/significance-calculator",
+    },
+    {
+      title: "P-Value Explainer",
+      description:
+        "An interactive graph that shows what a p-value really means. Drag sample size and rates to watch it move, and hover any part to see how it's calculated.",
+      href: "/apps/p-value-explainer",
     },
   ];
 
