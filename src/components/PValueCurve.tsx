@@ -22,19 +22,27 @@ const Formula = ({ children }: { children: React.ReactNode }) => (
 
 // Interactive null-distribution curve. Remount it (via key) whenever the seed changes, so the
 // what-if sliders always start from the real numbers.
-export default function PValueCurve({ seed, labelA, labelX, alpha, bonferroni = false, onSnapshot }: {
+export type SliderValues = { n: number; rA: number; rX: number };
+
+// Two modes: by default the sliders are a private what-if sandbox seeded from `seed`. Pass `onSlide`
+// to make them controlled instead: they report changes upward and always display `seed`. `anchor`
+// (defaults to seed) fixes the axis and slider ranges so they don't rescale mid-drag.
+export default function PValueCurve({ seed, anchor, labelA, labelX, alpha, bonferroni = false, onSnapshot, onSlide }: {
   seed: CurveSeed;
+  anchor?: CurveSeed;
   labelA: string;
   labelX: string;
   alpha: number;
   bonferroni?: boolean;
   onSnapshot?: (s: CurveSnapshot) => void;
+  onSlide?: (v: SliderValues) => void;
 }) {
   const seedN = Math.round((seed.nA + seed.nX) / 2);
   const seedStats = twoProportion(seed.rateA * seed.nA, seed.nA, seed.rateX * seed.nX, seed.nX);
-  const [whatIf, setWhatIf] = useState<{ n: number; rA: number; rX: number } | null>(null);
+  const [ownWhatIf, setWhatIf] = useState<SliderValues | null>(null);
   const [tip, setTip] = useState<{ key: TipKey; x: number; y: number; w: number } | null>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
+  const whatIf = onSlide ? null : ownWhatIf;
 
   const n = whatIf?.n ?? seedN;
   const rA = whatIf?.rA ?? seed.rateA * 100;
@@ -56,11 +64,14 @@ export default function PValueCurve({ seed, labelA, labelX, alpha, bonferroni = 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stats.rateA, stats.rateX, nA, nX, alpha]);
 
-  // Axis is fixed from the seed so dragging visibly squeezes/widens the curve
-  const range = niceCeil(Math.max(4 * seedStats.se * 100, 1.4 * Math.abs(seedStats.diff * 100), 0.5));
+  // Axis is fixed from the anchor so dragging visibly squeezes/widens the curve
+  const a = anchor ?? seed;
+  const anchorN = Math.round((a.nA + a.nX) / 2);
+  const anchorStats = twoProportion(a.rateA * a.nA, a.nA, a.rateX * a.nX, a.nX);
+  const range = niceCeil(Math.max(4 * anchorStats.se * 100, 1.4 * Math.abs(anchorStats.diff * 100), 0.5));
   const nMin = 10;
-  const nMax = Math.max(10000, seedN * 10);
-  const rateMax = Math.min(100, Math.max(20, Math.ceil((Math.max(seed.rateA, seed.rateX) * 200) / 10) * 10));
+  const nMax = Math.max(10000, anchorN * 10);
+  const rateMax = Math.min(100, Math.max(20, Math.ceil((Math.max(a.rateA, a.rateX) * 200) / 10) * 10));
 
   const W = 600;
   const H = 190;
@@ -86,7 +97,7 @@ export default function PValueCurve({ seed, labelA, labelX, alpha, bonferroni = 
 
   const nToPos = (v: number) => Math.round((1000 * Math.log(v / nMin)) / Math.log(nMax / nMin));
   const posToN = (pos: number) => Math.round(nMin * Math.pow(nMax / nMin, pos / 1000));
-  const update = (patch: Partial<{ n: number; rA: number; rX: number }>) => setWhatIf({ n, rA, rX, ...patch });
+  const update = (patch: Partial<SliderValues>) => (onSlide ?? setWhatIf)({ n, rA, rX, ...patch });
 
   // Tooltips: hover on desktop, tap on touch, focus via keyboard
   const place = (key: TipKey, clientX: number, clientY: number) => {
@@ -289,7 +300,7 @@ export default function PValueCurve({ seed, labelA, labelX, alpha, bonferroni = 
       <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-gray-600 dark:text-gray-400">
         <span>
           Significant when p &lt; {formatAlpha(alpha)}{bonferroni ? ' (Bonferroni adjusted)' : ''}.
-          {usingSeed && seed.nA !== seed.nX ? ' Sliders treat both groups as the same size.' : ''}
+          {!onSlide && usingSeed && seed.nA !== seed.nX ? ' Sliders treat both groups as the same size.' : ''}
         </span>
         {!usingSeed && (
           <Button type="button" onClick={() => setWhatIf(null)} className="px-3 py-1 text-xs">

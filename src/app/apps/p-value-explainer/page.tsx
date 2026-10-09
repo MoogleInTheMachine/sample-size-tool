@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import PValueCurve, { CurveSnapshot } from '@/components/PValueCurve';
+import PValueCurve, { CurveSeed, CurveSnapshot, SliderValues } from '@/components/PValueCurve';
 import { formatAlpha, formatP, formatPEq } from '@/lib/stats';
 
 const count = (v: number) => Math.round(v).toLocaleString();
@@ -82,20 +82,52 @@ function HowItsCalculated({ s }: { s: CurveSnapshot }) {
   );
 }
 
+type Counts = { aS: string; aT: string; bS: string; bT: string };
+const DEFAULTS: Counts = { aS: '200', aT: '2000', bS: '240', bT: '2000' };
+
+function parseCounts(c: Counts) {
+  const sA = parseInt(c.aS);
+  const nA = parseInt(c.aT);
+  const sB = parseInt(c.bS);
+  const nB = parseInt(c.bT);
+  const valid = nA > 0 && nB > 0 && sA >= 0 && sB >= 0 && sA <= nA && sB <= nB;
+  return { sA, nA, sB, nB, valid };
+}
+
+function toSeed(c: Counts): CurveSeed | null {
+  const { sA, nA, sB, nB, valid } = parseCounts(c);
+  return valid ? { nA, nX: nB, rateA: sA / nA, rateX: sB / nB } : null;
+}
+
 export default function PValueExplainer() {
-  const [aSuccess, setASuccess] = useState('200');
-  const [aTotal, setATotal] = useState('2000');
-  const [bSuccess, setBSuccess] = useState('240');
-  const [bTotal, setBTotal] = useState('2000');
+  const [counts, setCounts] = useState<Counts>(DEFAULTS);
+  // The chart's axis and slider ranges follow typed numbers only, so dragging doesn't rescale them
+  const [anchor, setAnchor] = useState<CurveSeed>(() => toSeed(DEFAULTS)!);
   const [confidenceLevel, setConfidenceLevel] = useState(0.95);
   const [snap, setSnap] = useState<CurveSnapshot | null>(null);
 
-  const sA = parseInt(aSuccess);
-  const nA = parseInt(aTotal);
-  const sB = parseInt(bSuccess);
-  const nB = parseInt(bTotal);
-  const valid = nA > 0 && nB > 0 && sA >= 0 && sB >= 0 && sA <= nA && sB <= nB;
+  const { sA, nA, sB, nB, valid } = parseCounts(counts);
   const alpha = Number((1 - confidenceLevel).toFixed(4));
+
+  const typed = (field: keyof Counts, value: string) => {
+    const next = { ...counts, [field]: value };
+    setCounts(next);
+    const seed = toSeed(next);
+    if (seed) setAnchor(seed);
+  };
+
+  // Sliders write back into the boxes. People per group scales both groups, keeping their ratio.
+  const slid = ({ n, rA, rX }: SliderValues) => {
+    const avg = (nA + nB) / 2;
+    const newNA = Math.max(1, Math.round((nA * n) / avg));
+    const newNB = Math.max(1, Math.round((nB * n) / avg));
+    setCounts({
+      aS: String(Math.min(newNA, Math.round((rA / 100) * newNA))),
+      aT: String(newNA),
+      bS: String(Math.min(newNB, Math.round((rX / 100) * newNB))),
+      bT: String(newNB),
+    });
+  };
 
   return (
     <div className="max-w-3xl mx-auto py-12 px-4 space-y-6 text-black dark:text-white">
@@ -111,12 +143,13 @@ export default function PValueExplainer() {
         <CardContent className="py-6">
           {valid ? (
             <PValueCurve
-              key={`${sA}/${nA}:${sB}/${nB}`}
               seed={{ nA, nX: nB, rateA: sA / nA, rateX: sB / nB }}
+              anchor={anchor}
               labelA="Group A"
               labelX="Group B"
               alpha={alpha}
               onSnapshot={setSnap}
+              onSlide={slid}
             />
           ) : (
             <p className="text-sm text-yellow-600 dark:text-yellow-400">
@@ -131,23 +164,24 @@ export default function PValueExplainer() {
           <div>
             <h2 className="text-lg font-semibold">Try your own numbers</h2>
             <p className="text-sm text-gray-700 dark:text-gray-300">
-              These start with example data. Change them and the chart above resets to match. For three or more groups,
-              use the <Link href="/apps/significance-calculator" className="underline">Significance Calculator</Link>.
+              These start with example data and are linked to the sliders above: drag a slider and these update, type
+              here and the sliders move. For three or more groups, use the{' '}
+              <Link href="/apps/significance-calculator" className="underline">Significance Calculator</Link>.
             </p>
           </div>
           {([
-            ['Group A', aSuccess, setASuccess, aTotal, setATotal],
-            ['Group B', bSuccess, setBSuccess, bTotal, setBTotal],
-          ] as const).map(([label, s, setS, t, setT]) => (
+            ['Group A', 'aS', 'aT'],
+            ['Group B', 'bS', 'bT'],
+          ] as const).map(([label, sKey, tKey]) => (
             <div key={label} className="grid grid-cols-2 sm:grid-cols-[6rem_1fr_1fr] gap-x-3 gap-y-2 items-center">
               <div className="col-span-2 sm:col-span-1 font-semibold text-sm">{label}</div>
               <label className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
                 <span>Successes</span>
-                <Input aria-label={`${label} successes`} value={s} onChange={(e) => setS(e.target.value)} type="number" min="0" />
+                <Input aria-label={`${label} successes`} value={counts[sKey]} onChange={(e) => typed(sKey, e.target.value)} type="number" min="0" />
               </label>
               <label className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
                 <span>Participants</span>
-                <Input aria-label={`${label} participants`} value={t} onChange={(e) => setT(e.target.value)} type="number" min="1" />
+                <Input aria-label={`${label} participants`} value={counts[tKey]} onChange={(e) => typed(tKey, e.target.value)} type="number" min="1" />
               </label>
             </div>
           ))}

@@ -27,6 +27,12 @@ export default function ToolCards() {
         "An interactive graph that shows what a p-value really means. Drag sample size and rates to watch it move, and hover any part to see how it's calculated.",
       href: "/apps/p-value-explainer",
     },
+    {
+      title: "Chi-Square Explainer",
+      description:
+        "Test whether two categories are related, like which page people saw and which plan they picked. Edit a table and watch the chi-square curve, expected counts, and effect size update.",
+      href: "/apps/chi-square-explainer",
+    },
   ];
 
   return (

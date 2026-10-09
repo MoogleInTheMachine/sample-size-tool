@@ -41,3 +41,91 @@ export const formatPts = (pts: number) => `${pts > 0 ? '+' : ''}${pts.toFixed(1)
 export const formatAlpha = (a: number) => String(Number(a.toFixed(4)));
 // "= 0.043" or "< 0.001", for the end of a formula line
 export const formatPEq = (p: number) => (p < 0.001 ? '< 0.001' : `= ${p.toFixed(3)}`);
+
+// ---- Chi-square ----
+
+// ln Γ(x) (Lanczos approximation)
+export function gammaLn(x: number) {
+  const c = [76.18009172947146, -86.50532032941677, 24.01409824083091, -1.231739572450155, 0.1208650973866179e-2, -0.5395239384953e-5];
+  let y = x;
+  const t = x + 5.5;
+  let ser = 1.000000000190015;
+  for (const cj of c) ser += cj / ++y;
+  return -(t - (x + 0.5) * Math.log(t)) + Math.log((2.5066282746310005 * ser) / x);
+}
+
+// Upper regularized incomplete gamma Q(a, x) (series below a+1, continued fraction above)
+function gammaQ(a: number, x: number) {
+  if (x <= 0) return 1;
+  const front = Math.exp(-x + a * Math.log(x) - gammaLn(a));
+  if (x < a + 1) {
+    let ap = a;
+    let del = 1 / a;
+    let sum = del;
+    for (let i = 0; i < 500; i++) {
+      ap++;
+      del *= x / ap;
+      sum += del;
+      if (Math.abs(del) < Math.abs(sum) * 1e-14) break;
+    }
+    return 1 - sum * front;
+  }
+  const tiny = 1e-300;
+  let b = x + 1 - a;
+  let c = 1 / tiny;
+  let d = 1 / b;
+  let h = d;
+  for (let i = 1; i < 500; i++) {
+    const an = -i * (i - a);
+    b += 2;
+    d = an * d + b;
+    if (Math.abs(d) < tiny) d = tiny;
+    c = b + an / c;
+    if (Math.abs(c) < tiny) c = tiny;
+    d = 1 / d;
+    const del = d * c;
+    h *= del;
+    if (Math.abs(del - 1) < 1e-14) break;
+  }
+  return front * h;
+}
+
+// P(χ² ≥ x) for df degrees of freedom: the chi-square p-value
+export const chiSquareSf = (x: number, df: number) => gammaQ(df / 2, x / 2);
+
+// Chi-square density, for drawing the curve
+export function chiSquarePdf(x: number, df: number) {
+  if (x <= 0) return 0;
+  const k = df / 2;
+  return Math.exp((k - 1) * Math.log(x) - x / 2 - k * Math.LN2 - gammaLn(k));
+}
+
+// Critical value: the χ² that leaves `alpha` in the right tail (bisection)
+export function chiSquareInv(alpha: number, df: number) {
+  let lo = 0;
+  let hi = df + 10 * Math.sqrt(2 * df) + 10;
+  while (chiSquareSf(hi, df) > alpha) hi *= 2;
+  for (let i = 0; i < 100; i++) {
+    const mid = (lo + hi) / 2;
+    if (chiSquareSf(mid, df) > alpha) lo = mid;
+    else hi = mid;
+  }
+  return (lo + hi) / 2;
+}
+
+// Chi-square test of independence on an r × c table of counts
+export function chiSquareTest(observed: number[][]) {
+  const rowTotals = observed.map((row) => row.reduce((s, v) => s + v, 0));
+  const colTotals = observed[0].map((_, j) => observed.reduce((s, row) => s + row[j], 0));
+  const total = rowTotals.reduce((s, v) => s + v, 0);
+  const expected = observed.map((_, i) => colTotals.map((ct) => (rowTotals[i] * ct) / total));
+  const contributions = observed.map((row, i) => row.map((o, j) => (o - expected[i][j]) ** 2 / expected[i][j]));
+  const chi2 = contributions.flat().reduce((s, v) => s + v, 0);
+  const df = (observed.length - 1) * (colTotals.length - 1);
+  const p = chiSquareSf(chi2, df);
+  const k = Math.min(observed.length, colTotals.length) - 1;
+  const cramersV = Math.sqrt(chi2 / (total * k));
+  const minExpected = Math.min(...expected.flat());
+  const lowExpectedCells = expected.flat().filter((e) => e < 5).length;
+  return { rowTotals, colTotals, total, expected, contributions, chi2, df, p, cramersV, minExpected, lowExpectedCells };
+}
